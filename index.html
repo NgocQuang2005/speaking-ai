@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#d03a84">
+  <meta name="description" content="Chấm bài nói tiếng Anh bằng AI: chép lời, chấm 4 tiêu chí, theo dõi tiến bộ và xuất báo cáo cho phụ huynh.">
+  <title>Speaking AI Pro — Chấm bài nói tiếng Anh</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="config.local.js" defer></script>
+  <script src="charts.js" defer></script>
+  <script src="features.js" defer></script>
+  <script src="app.js" defer></script>
+  <script src="recorder.js" defer></script>
+  <script src="games.js" defer></script>
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Bỏ qua tới nội dung chính</a>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand" aria-label="Speaking AI Pro">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 40 40">
+            <path d="M8 21v-2m5 8V13m5 17V10m5 23V7m5 20V13m5 8v-2" />
+          </svg></span>
+        <span>Speaking <strong>AI Pro</strong><small>STUDIO CHẤM BÀI NÓI</small></span>
+      </div>
+      <div class="top-actions"><span class="local-pill"><span></span> Chạy trên máy của bạn</span>
+        <button id="gamesBtn" class="secondary-button" type="button">🎮 Trò chơi</button>
+        <button id="rubricBtn" class="secondary-button" type="button">Thang điểm</button>
+        <button id="historyBtn" class="secondary-button" type="button">Lịch sử chấm</button>
+        <button id="settingsBtn" class="icon-button" type="button" aria-label="Cài đặt AI" title="Cài đặt AI">⚙</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="shell">
+    <section class="intro">
+      <div>
+        <p class="eyebrow">WORKSPACE / ENGLISH SPEAKING</p>
+        <h1>Chấm bài nói <em>rõ ràng hơn.</em></h1>
+        <p>Tải bài ghi âm hoặc ghi âm trực tiếp, xem nhận xét theo từng tiêu chí, theo dõi tiến bộ của từng bé và gửi báo cáo cho phụ huynh.</p>
+      </div>
+      <div class="intro-graphic" aria-hidden="true">
+        <div class="orb"><svg viewBox="0 0 80 80">
+            <path d="M24 46a16 16 0 0 0 32 0M40 57v9m-12 0h24M32 19a8 8 0 0 1 16 0v27a8 8 0 0 1-16 0z" />
+          </svg></div>
+        <div class="wave">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats-strip" aria-label="Thống kê tổng quan">
+      <div class="stat-card"><span class="stat-icon" aria-hidden="true">📋</span><div><strong id="statCount">0</strong><small>Bài đã chấm</small></div></div>
+      <div class="stat-card"><span class="stat-icon" aria-hidden="true">🧒</span><div><strong id="statStudents">0</strong><small>Học sinh</small></div></div>
+      <div class="stat-card"><span class="stat-icon" aria-hidden="true">⭐</span><div><strong id="statAverage">—</strong><small>Điểm trung bình</small></div></div>
+      <div class="stat-card"><span class="stat-icon" aria-hidden="true">🏆</span><div><strong id="statBest">—</strong><small>Điểm cao nhất</small></div></div>
+      <p class="stat-insight"><span id="statInsight"></span> <button id="statsHistoryBtn" class="text-button" type="button">Xem lịch sử →</button></p>
+    </section>
+
+    <div class="workspace-grid">
+      <section class="panel upload-panel" aria-labelledby="uploadTitle">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">01 / BÀI NÓI</p>
+            <h2 id="uploadTitle">Bài nói cần chấm</h2>
+          </div><span class="step-badge">Audio & video</span>
+        </div>
+        <div id="sourcePicker">
+          <div class="source-tabs" role="tablist" aria-label="Nguồn bài nói">
+            <button id="tabUpload" class="source-tab active" role="tab" aria-selected="true" aria-controls="uploadMode" type="button">↥ Tải tệp lên</button>
+            <button id="tabRecord" class="source-tab" role="tab" aria-selected="false" aria-controls="recordMode" type="button">🎙 Ghi âm trực tiếp</button>
+          </div>
+          <div id="uploadMode" role="tabpanel">
+            <div id="dropzone" class="dropzone" role="button" tabindex="0" aria-label="Chọn hoặc thả tệp audio, video">
+              <div class="upload-icon" aria-hidden="true">↥</div>
+              <h3>Thả bài nói vào đây</h3>
+              <p>hoặc nhấn để chọn tệp trên máy</p><span class="file-types">MP3 · WAV · M4A · MP4 · WEBM</span>
+            </div>
+          </div>
+          <div id="recordMode" class="record-box hidden" role="tabpanel">
+            <canvas id="levelMeter" width="480" height="64" aria-hidden="true"></canvas>
+            <div id="recordTimer" class="record-timer" aria-hidden="true">00:00</div>
+            <button id="recordBtn" class="record-button" type="button"><span class="rec-dot" aria-hidden="true"></span><span id="recordLabel">Bắt đầu ghi âm</span></button>
+            <p id="recordStatus" class="record-status" role="status" aria-live="polite">Cho phép micro khi trình duyệt hỏi. Ghi tối đa 10 phút.</p>
+          </div>
+        </div>
+        <input id="fileInput" type="file" accept="audio/*,video/*,.mp3,.wav,.m4a,.mp4,.webm" hidden>
+        <div id="fileCard" class="file-card hidden">
+          <div class="file-type-icon" id="fileIcon">♪</div>
+          <div class="file-meta"><strong id="fileName"></strong><span id="fileSize"></span></div><button
+            id="removeFileBtn" type="button" class="text-button">Đổi tệp</button>
+        </div>
+        <div id="mediaWrap" class="media-wrap hidden"></div>
+        <p class="hint">Chọn tệp tối đa 40 MB để gửi trực tiếp tới Gemini. AI cần có Internet để chấm điểm.</p>
+      </section>
+
+      <section class="panel controls-panel" aria-labelledby="controlsTitle">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">02 / THIẾT LẬP</p>
+            <h2 id="controlsTitle">Cách nhận xét</h2>
+          </div>
+        </div>
+        <div class="field-grid"><label>Giáo viên<select id="teacherSelect">
+              <option value="thầy">Thầy</option>
+              <option value="cô">Cô</option>
+            </select></label><label>Gọi học sinh là<select id="studentLabelSelect">
+              <option value="con">Con</option>
+              <option value="em">Em</option>
+              <option value="học viên">Học viên</option>
+            </select></label></div>
+        <fieldset class="detail-field">
+          <legend>Độ chi tiết</legend>
+          <div class="segmented"><label><input name="detail" type="radio" value="short"><span>Ngắn
+                gọn</span></label><label><input name="detail" type="radio" value="medium"><span>Tiêu
+                chuẩn</span></label><label><input name="detail" type="radio" value="detailed" checked><span>Chi
+                tiết</span></label></div>
+        </fieldset>
+        <button id="analyzeBtn" class="primary-button" type="button" disabled><span id="analyzeLabel">Bắt đầu chấm
+            điểm</span><span class="button-spark" aria-hidden="true">✦</span></button>
+        <div id="gradingProgress" class="grading-progress hidden" role="status" aria-live="polite">
+          <div class="progress-heading"><span id="progressText">Đang chuẩn bị bài nói…</span><span
+              id="progressStep">Bước 1/3</span></div>
+          <div class="progress-track">
+            <div class="progress-fill"></div>
+          </div>
+          <p>Thời gian xử lý tùy thuộc độ dài tệp và tốc độ phản hồi của Gemini.</p>
+        </div>
+        <p class="teacher-note">AI hỗ trợ chấm điểm ban đầu. Giáo viên nên kiểm tra trước khi gửi báo cáo.</p>
+      </section>
+    </div>
+
+    <div id="alert" class="alert hidden" role="alert"><span id="alertText"></span>
+      <div id="alertActions"></div>
+    </div>
+
+    <section id="gamesSection" class="history-section games-section hidden" aria-labelledby="gamesTitle">
+      <div class="history-heading">
+        <div>
+          <p class="eyebrow">GÓC LUYỆN TẬP / CHƠI MÀ HỌC</p>
+          <h2 id="gamesTitle">🎮 Trò chơi tiếng Anh</h2>
+        </div><button id="closeGamesBtn" class="secondary-button" type="button">Đóng</button>
+      </div>
+      <div id="gameMenuWrap">
+        <label class="game-category">Nhóm từ vựng<select id="gameCategory">
+            <option value="all">Tất cả</option>
+            <option value="animals">🐱 Động vật</option>
+            <option value="fruits">🍎 Trái cây</option>
+            <option value="food">🍞 Đồ ăn &amp; uống</option>
+            <option value="things">🎒 Đồ vật</option>
+            <option value="nature">🌈 Thiên nhiên</option>
+          </select></label>
+        <div class="game-menu">
+          <button class="game-card" data-game="quiz" type="button"><span class="game-card-icon" aria-hidden="true">❓</span><strong>Đố từ vựng</strong><span>Nhìn hình, chọn từ tiếng Anh đúng.</span><small></small></button>
+          <button class="game-card" data-game="listen" type="button"><span class="game-card-icon" aria-hidden="true">🔊</span><strong>Nghe và chọn</strong><span>Nghe từ tiếng Anh rồi chọn hình đúng.</span><small></small></button>
+          <button class="game-card" data-game="scramble" type="button"><span class="game-card-icon" aria-hidden="true">🔤</span><strong>Sắp xếp chữ cái</strong><span>Ghép các chữ cái thành từ đúng.</span><small></small></button>
+          <button class="game-card" data-game="memory" type="button"><span class="game-card-icon" aria-hidden="true">🃏</span><strong>Lật thẻ ghép cặp</strong><span>Tìm hình và từ giống nhau.</span><small></small></button>
+        </div>
+      </div>
+      <div id="gameStage" class="game-stage hidden">
+        <div class="game-head">
+          <button id="gameBackBtn" class="text-button" type="button">← Chọn trò khác</button>
+          <strong id="gameTitle"></strong>
+          <span id="gameScore"></span>
+          <span id="gameProgress"></span>
+        </div>
+        <p id="gameFeedback" class="game-feedback" role="status" aria-live="polite"></p>
+        <div id="gameBody"></div>
+      </div>
+    </section>
+
+    <section id="historySection" class="history-section hidden" aria-labelledby="historyTitle">
+      <div class="history-heading">
+        <div>
+          <p class="eyebrow">LỊCH SỬ / TRÊN TRÌNH DUYỆT NÀY</p>
+          <h2 id="historyTitle">Lịch sử chấm bài</h2>
+        </div><button id="closeHistoryBtn" class="secondary-button" type="button">Đóng</button>
+      </div>
+      <div class="history-filters">
+        <label>Lớp<select id="historyClassFilter"><option value="">Tất cả lớp</option></select></label>
+        <label>Sắp xếp<select id="historySort">
+            <option value="newest">Mới nhất</option>
+            <option value="oldest">Cũ nhất</option>
+            <option value="high">Điểm cao → thấp</option>
+            <option value="low">Điểm thấp → cao</option>
+            <option value="name">Tên A → Z</option>
+          </select></label>
+        <label>Tìm học sinh<input id="historyNameSearch" type="search" placeholder="Nhập tên học sinh" autocomplete="off"></label>
+      </div>
+      <div class="history-actions">
+        <button id="exportCsvBtn" class="secondary-button" type="button">⬇ Xuất CSV (Excel)</button>
+        <button id="backupBtn" class="secondary-button" type="button">Sao lưu</button>
+        <button id="restoreBtn" class="secondary-button" type="button">Khôi phục</button>
+        <input id="restoreInput" type="file" accept="application/json,.json" hidden>
+      </div>
+      <div id="trendWrap" class="trend-card hidden">
+        <div class="trend-head"><h3 id="trendTitle"></h3><span id="trendSummary"></span></div>
+        <div id="trendChart"></div>
+        <div id="trendLegend" class="legend"></div>
+      </div>
+      <p id="historyEmpty" class="history-empty">Chưa có bài nào được chấm.</p>
+      <div id="historyTableWrap" class="history-table-wrap hidden">
+        <table>
+          <thead>
+            <tr>
+              <th>Thời gian chấm</th>
+              <th>Học sinh / Tệp</th>
+              <th>Điểm</th>
+              <th>Nhận xét kết quả</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="historyRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="reportSection" class="report-section hidden" aria-labelledby="reportTitle">
+      <div class="report-toolbar">
+        <div>
+          <p class="eyebrow">03 / KẾT QUẢ</p>
+          <h2 id="reportTitle">Báo cáo bài nói</h2><span id="reportModel" class="report-model"></span>
+        </div>
+        <div class="toolbar-actions"><button id="editBtn" class="secondary-button" type="button">Chỉnh
+            sửa</button><button id="saveHistoryBtn" class="secondary-button" type="button">Lưu vào lịch
+            sử</button><button id="copyBtn" class="secondary-button" type="button">Sao chép</button><button
+            id="parentMsgBtn" class="secondary-button" type="button">Tin nhắn phụ huynh</button><button id="pdfBtn"
+            class="secondary-button" type="button">Xuất PDF</button><button id="newBtn" class="primary-button small"
+            type="button">Chấm bài khác</button></div>
+      </div>
+      <article id="report" class="report">
+        <div class="report-top">
+          <div class="report-top-main">
+            <p class="eyebrow">SPEAKING AI PRO / REPORT</p>
+            <h2>Báo cáo phân tích tiếng Anh</h2>
+            <div class="report-person"><label>Học sinh<input id="studentName" type="text"
+                  placeholder="Nhập tên học sinh"></label><label>Lớp<input id="studentClass" type="text"
+                  placeholder="Nhập lớp"></label><label>Ngày<input id="reportDate" type="date"></label></div>
+            <p id="compareNote" class="compare-note hidden"></p>
+          </div>
+          <div class="score-block">
+            <div class="total-score"><small>ĐIỂM TRUNG BÌNH</small><strong id="averageScore">0.0</strong><span>/ 10</span>
+            </div>
+            <div id="starRating" class="stars" role="img" aria-label="0 trên 5 sao"><span class="stars-base">★★★★★</span><span id="starFill" class="stars-fill"><span>★★★★★</span></span></div>
+            <span id="levelBadge" class="level-badge"></span>
+          </div>
+        </div>
+        <div class="report-body">
+          <div class="report-main">
+            <section class="overview-card">
+              <div id="radarWrap" class="radar-wrap"></div>
+              <div id="scoreBars" class="score-bars"></div>
+            </section>
+            <section class="transcript-card">
+              <div class="section-label">BẢN CHÉP LỜI</div>
+              <p id="transcription"></p>
+              <p id="transcriptLegend" class="transcript-legend hidden"><mark>Đánh dấu</mark> là cụm từ có lỗi được nêu trong báo cáo.</p>
+            </section>
+            <div id="criteriaGrid" class="criteria-grid"></div>
+          </div>
+          <aside class="report-side">
+            <section class="summary-card strengths">
+              <div class="section-label">✦ ĐIỂM MẠNH</div>
+              <p id="strengths"></p>
+            </section>
+            <section class="summary-card weaknesses">
+              <div class="section-label">◎ CẦN CẢI THIỆN</div>
+              <p id="weaknesses"></p>
+            </section>
+            <section class="plan-card">
+              <div class="section-label">LỘ TRÌNH LUYỆN TẬP</div>
+              <ol id="actionPlan"></ol>
+            </section>
+          </aside>
+        </div>
+      </article>
+    </section>
+
+    <footer class="site-footer">
+      <p>Speaking AI Pro · Dữ liệu lịch sử chỉ lưu trên trình duyệt này · AI chấm điểm ban đầu, giáo viên xác nhận trước khi gửi phụ huynh.</p>
+    </footer>
+  </main>
+
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+  <div id="confetti" class="confetti-layer" aria-hidden="true"></div>
+
+  <dialog id="settingsDialog" class="settings-dialog">
+    <form method="dialog">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow">CẤU HÌNH LOCAL</p>
+          <h2>Cài đặt Gemini</h2>
+        </div><button class="icon-button" value="cancel" aria-label="Đóng">×</button>
+      </div>
+      <p class="dialog-copy">Bạn có thể dán khóa AI Studio ở đây cho phiên dùng hiện tại, hoặc điền vào hằng số
+        <code>API_KEY</code> trong <code>app.js</code>.</p><label>API key<input id="apiKeyInput" type="password"
+          placeholder="Dán Gemini API key" autocomplete="off"></label>
+      <label class="check-row"><input id="rememberKey" type="checkbox"><span>Ghi nhớ khóa trên trình duyệt này <small>(chỉ nên bật trên máy cá nhân)</small></span></label>
+      <label>Model<input id="modelInput" type="text"
+          value="gemini-3.6-flash" spellcheck="false"></label>
+      <p class="dialog-copy test-note">Kiểm tra gửi một câu ngắn tới Gemini để xác nhận khóa và model, chưa tải video
+        lên.</p>
+      <div id="keyTestStatus" class="key-test-status hidden" role="status" aria-live="polite"></div>
+      <div class="dialog-actions"><button id="clearKeyBtn" type="button" class="text-button">Xóa khóa đang nhập</button>
+        <div class="dialog-button-group"><button id="testKeyBtn" type="button" class="secondary-button">Kiểm tra API
+            key</button><button id="saveSettingsBtn" value="save" class="primary-button small">Lưu cài đặt</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="rubricDialog" class="settings-dialog rubric-dialog">
+    <form method="dialog">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow">TIÊU CHÍ CHẤM</p>
+          <h2>Thang điểm &amp; tiêu chí</h2>
+        </div><button class="icon-button" value="cancel" aria-label="Đóng">×</button>
+      </div>
+      <p class="dialog-copy">Mỗi tiêu chí chấm độc lập trên thang 0–10 (bước 0,5). Điểm trung bình là trung bình cộng 4 tiêu chí; số sao = điểm ÷ 2.</p>
+      <table class="rubric-table">
+        <thead><tr><th>Điểm TB</th><th>Xếp loại</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td>9 – 10</td><td>🌟 Xuất sắc</td><td>Rất tốt xuyên suốt, sai sót hiếm và ít ảnh hưởng.</td></tr>
+          <tr><td>8 – 8,9</td><td>✨ Rất tốt</td><td>Dễ hiểu, kiểm soát tốt, còn vài lỗi nhỏ.</td></tr>
+          <tr><td>6,5 – 7,9</td><td>👍 Tốt</td><td>Người nghe hiểu dễ nhưng có hạn chế rõ.</td></tr>
+          <tr><td>5 – 6,4</td><td>🙂 Đạt</td><td>Truyền đạt được ý chính, lỗi xuất hiện thường xuyên.</td></tr>
+          <tr><td>3,5 – 4,9</td><td>💪 Cần cố gắng</td><td>Khó theo dõi nhiều đoạn, lỗi lặp lại.</td></tr>
+          <tr><td>0 – 3,4</td><td>🤝 Cần hỗ trợ thêm</td><td>Rất khó truyền đạt bằng tiếng Anh.</td></tr>
+        </tbody>
+      </table>
+      <dl class="rubric-list">
+        <dt>Phát âm</dt><dd>Âm, âm cuối, trọng âm, ngữ điệu và mức dễ hiểu.</dd>
+        <dt>Trôi chảy</dt><dd>Nhịp nói, quãng dừng, tự sửa và khả năng nối ý.</dd>
+        <dt>Ngữ pháp</dt><dd>Cấu trúc câu, thì, hòa hợp chủ vị, giới từ, mạo từ.</dd>
+        <dt>Từ vựng</dt><dd>Chọn từ đúng nghĩa, kết hợp từ và độ linh hoạt theo chủ đề.</dd>
+      </dl>
+      <div class="dialog-actions"><span></span><button value="close" class="primary-button small">Đã hiểu</button></div>
+    </form>
+  </dialog>
+</body>
+
+</html>
